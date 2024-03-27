@@ -1,0 +1,13 @@
+.container{
+    display: grid;
+    place-content: center;
+    min-height: 750px;
+    overflow: hidden;
+}
+
+.box{
+    width: 100%;
+    border: 5px solid;
+    margin: auto;
+    padding: 10px;
+}
