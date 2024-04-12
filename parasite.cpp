@@ -4,31 +4,62 @@
 #include "opencv2/opencv.hpp"
 #include <iostream>
 #include <fstream>
+#include <vector>
+#include <string>
+
 using namespace cv;
 using namespace std;
 
-vector<int> avg_rgb(int k, int h, Mat_<Vec3d> image){
-    int r = image(h,k)[2];
-    int g = image(h,k)[1];
-    int b = image(h,k)[0];
-    for(int i = 1;i<10;i++){
-        r += image(h+i,k)[2];
-        r += image(h+i,k+i)[2];
-        r += image(h,k+i)[2];
-        r += image(h,k-i)[2];
-        g += image(h+i,k)[1];
-        g += image(h+i,k+i)[1];
-        g += image(h,k+i)[1];
-        g += image(h,k-i)[1];
-        b += image(h+i,k)[0];
-        b += image(h+i,k+i)[0];
-        b += image(h,k+i)[0];
-        b += image(h,k-i)[0];
+struct Parasite {
+    float centerX;
+    float centerY; 
+    float width;
+    float height;
+    float estArea;
+    Parasite(float cx, float cy, float w, float h, float a) : centerX(cx), centerY(cy), width(w), height(h), estArea(a) {}
+};
+
+vector<Parasite> readAnnotations(string name) {
+    vector<Parasite> Annotations;
+    cout << name;
+
+    ifstream file("../" + name);
+
+    if (!file) {
+        std::cerr << "Unable to open file." << std::endl;
+        return;
     }
-    r = r/41;
-    b = b/41;
-    g = g/41;
-    return {r, g, b};
+
+    Parasite para;
+    while (file >> para.centerX >> para.centerY >> para.width >> para.height) {
+        para.estArea = para.width * para.height;
+        Annotations.push_back(para);
+    }
+
+    file.close();
+
+    for (const auto& r : Annotations) {
+        std::cout << "Parasite: "
+                  << "CenterX = " << r.centerX << ", "
+                  << "CenterY = " << r.centerY << ", "
+                  << "Width = " << r.width << ", "
+                  << "Height = " << r.height << std::endl;
+    }
+    return Annotations;
+}
+
+float calculateSquaredDistance(float x1, float y1, float x2, float y2) {
+    return std::pow(x2 - x1, 2) + std::pow(y2 - y1, 2);
+}
+
+void calculateError(const vector<Parasite>& expected, const vector<Parasite>& observed) {
+
+    
+
+
+    //Apply the Hungarian Algorithm 
+    //To Tackle This Problem We First Apply a Threshold that Each Guessed Center must be within 30 
+    //pixels of an annotated center. We can do this in O(n^2) time. 
 }
 
 int main(int argc, const char* argv[]) {
@@ -40,14 +71,16 @@ int main(int argc, const char* argv[]) {
     int minRad = 5; //minimum considered detection
     int maxRad = 20;
     int mdd = 30; //min distance denominator: what the min distance between centers is divided into (larger value = smaller mindist)
-    bool morethanq = false; //there are coins higher in value than quarter
-    cout << argc;
+    string fileName = "";
+    vector<Parasite> Annotations;
+
     for(int i =0; i<argc; i++){ 
         if(strcmp(argv[i], "-f") == 0){
+            fileName = argv[i+1];
             image = imread(argv[i+1],1);
             im =imread(argv[i+1],1);
             gray = imread(argv[i+1],IMREAD_GRAYSCALE); //grayscale input image
-            cout << "file processed";
+            cout << "file processed\n";
         }
         if(strcmp(argv[i], "-ht") == 0){ //cannyedge thresh
             ht = stoi(argv[i+1]);
@@ -64,15 +97,20 @@ int main(int argc, const char* argv[]) {
         if(strcmp(argv[i], "-mdd") == 0){
             mdd = stoi(argv[i+1]);
         }
-        if(strcmp(argv[i], "-highestcoin") == 0){
-            if(strcmp(argv[i+1], "quarter") !=0){
-                morethanq = true;
-            }
-        }
     }
+    try {
+        Annotations = readAnnotations(fileName + ".txt");
+    }
+    catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        return 1;
+    }
+    
+    int imgArea = image.cols * image.rows;
 
     cout << "Image Width: " << image.cols << "\n";
     cout << "Image Height: " << image.rows << "\n";
+    cout << "Image Area: " << imgArea << "\n";
 
     cvtColor(image, gray, COLOR_BGR2GRAY, 0);
     imwrite("imageg.png", gray);
@@ -80,13 +118,82 @@ int main(int argc, const char* argv[]) {
     Mat edges; Mat cannyout;
     medianBlur(gray, gray, 5);
     GaussianBlur(gray, gray, Size(3, 3), 0, 0, BORDER_DEFAULT);
-    Canny(gray, cannyout, ht/1.4, ht, 3); //grayscale image, edges out, low thresh, high thresh, sobel kernel (3x3)
-    edges = Scalar::all(0);
-    gray.copyTo(edges, cannyout);
-    imwrite("./imagef.jpg", edges);
+
+    Mat thresh;
+    threshold(gray, thresh, 230, 255, THRESH_BINARY);
+    imwrite("imaget.png", thresh);
+
+    vector<vector<Point>> contours;
+    vector<Vec4i> hierarchy;
+    findContours(thresh, contours, hierarchy, RETR_TREE, CHAIN_APPROX_NONE);
+
+    vector<Parasite> detectedParasites;
+
+    for (size_t i = 0; i < contours.size(); i++) {
+        // Calculate contour area and bounding rectangle
+        double area = static_cast<int>(cv::contourArea(contours[i]));
+        cv::Rect boundingBox = cv::boundingRect(contours[i]);
+        double aspectRatio = (double)boundingBox.width / boundingBox.height;
+
+        // Filter based on aspect ratio and minimum size
+        double elongationFactor = std::abs(1-aspectRatio);
+
+        if (elongationFactor > 0.1 && elongationFactor<1 && area > 1000 && area < 4000) {
+            // Approximate contour to smooth shape
+            std::vector<cv::Point> approx;  
+            cv::approxPolyDP(contours[i], approx, 0.01 * cv::arcLength(contours[i], true), true);
+
+            if (approx.size() > 4) { // Need at least 5 points to fit ellipse
+                cv::RotatedRect fittedEllipse = cv::fitEllipse(approx);
+
+                // Further checks can be added here, e.g., comparing the area of the contour to the area of the fitted ellipse
+
+                // Draw the ellipse
+                cv::ellipse(image, fittedEllipse, cv::Scalar(255, 0, 0), 2);
+                
+                cv::Point2f centerPoint = fittedEllipse.center;
+                cv::Point point(static_cast<int>(centerPoint.x), static_cast<int>(centerPoint.y));
+                cv::circle(image, point, 2, cv::Scalar(0,0,255), -1);
+
+                Parasite p(centerPoint.x, centerPoint.y, fittedEllipse.width, fittedEllipse.height, fittedEllipse.width*fittedEllipse.height);
+                detectedParasites.push_back(p);
+
+                std::string text = "(" + std::to_string(point.x) + ", " + std::to_string(point.y) + ")";
+                int fontFace = cv::FONT_HERSHEY_SIMPLEX;
+                double fontScale = 0.5;
+                int textThickness = 1;
+                cv::Point textOrg(point.x + 10, point.y - 10); // Position the text slightly right and above the point
+                cv::Scalar textColor(0, 0, 0); // White color for the text
+
+                // Put the text on the image
+                cv::putText(image, text, textOrg, fontFace, fontScale, textColor, textThickness);
+
+                cout << "Location: " << point << "\tArea" << area << "\n";
+            }
+        }
+    }
+
+
+    // CALCULATE ERROR //
+    calculateError(Annotations, detectedParasites);
+
+
+
+    Mat image_copy = image.clone();
+    //drawContours(image_copy, contours, -1, Scalar(0, 255, 0), 2);
+    imshow("None approximation", image_copy);
+    waitKey(0);
+    imwrite("contours_none_image1.jpg", image_copy);
+    destroyAllWindows();
+
+
+    //Canny(gray, cannyout, ht/1.4, ht, 3); //grayscale image, edges out, low thresh, high thresh, sobel kernel (3x3)
+    //edges = Scalar::all(0);
+    //gray.copyTo(edges, cannyout);
+    //imwrite("./imagef.jpg", edges);
 
     
-    vector<Vec3f> circles;
+    /*vector<Vec3f> circles;
     HoughCircles(gray, circles, HOUGH_GRADIENT, 1, //grayscale image, vector w xyrad for circles, gradient, inverse resolution ratio, min distance between centers, threshold for cannyedge, threshold for centers, minrad, maxrad;
                  gray.rows/mdd,  
                  ht, ct, minRad, maxRad);
@@ -104,7 +211,7 @@ int main(int argc, const char* argv[]) {
         //pennies red, quarters purple, nickel yellow
         circle(image, center, radius, Scalar(0,0,255), 4, LINE_AA); //detected circles in red, thickness = 4 TEMPORARILY BLACK
     }
-    imwrite("./imageCircles.jpg",image);
+    imwrite("./imageCircles.jpg",image);*/
 
 }
 /*
