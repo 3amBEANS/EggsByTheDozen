@@ -6,6 +6,7 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include <algorithm>
 
 using namespace cv;
 using namespace std;
@@ -16,7 +17,8 @@ struct Parasite {
     float width;
     float height;
     float estArea;
-    Parasite(float cx, float cy, float w, float h, float a) : centerX(cx), centerY(cy), width(w), height(h), estArea(a) {}
+    Parasite() {};
+    Parasite(float cx, float cy, float w, float h, float a) : centerX(cx), centerY(cy), width(w), height(h), estArea(a) {};
 };
 
 vector<Parasite> readAnnotations(string name) {
@@ -27,7 +29,6 @@ vector<Parasite> readAnnotations(string name) {
 
     if (!file) {
         std::cerr << "Unable to open file." << std::endl;
-        return;
     }
 
     Parasite para;
@@ -52,7 +53,99 @@ float calculateSquaredDistance(float x1, float y1, float x2, float y2) {
     return std::pow(x2 - x1, 2) + std::pow(y2 - y1, 2);
 }
 
-void calculateError(const vector<Parasite>& expected, const vector<Parasite>& observed) {
+vector<int> calculateError(const vector<Parasite>& expected, const vector<Parasite>& observed) {
+    int expSize = expected.size(); int obSize = observed.size();
+        vector<int> MissNums;
+
+    if (obSize > expSize * 1.5) { 
+        cout << "Too many detected parasites, increase binary threshold.";
+        return MissNums;
+    }
+    else if (obSize < expSize * 0.4) { 
+        cout << "Not enough detected parasites, decrease binary threshold.";
+        return MissNums;
+    }
+
+    int DUPLICATES = 0;
+    int MISSES = 0;
+    float totalError = 0;
+    int UNDETECTED = 0;
+
+    vector<int> detectionPaired(obSize, 1); 
+
+    Parasite p1; Parasite p2;
+    for (int i=0; i<expSize; i++) {
+        float maxDist = 901;
+        float currDist = 0;
+        bool paired = false;
+        p1 = expected[i];
+        for (int a=0; a<obSize; a++) {
+            p2 = observed[a];
+            currDist = calculateSquaredDistance(p1.centerX, p1.centerY, p2.centerX, p2.centerY);
+            if (currDist < 900) {
+                detectionPaired[a] = 0;
+                float realDist = sqrt(currDist);
+
+                if (!paired) {
+                    paired = true;
+                    totalError += 0.1 * realDist;
+                }
+                else {
+                    DUPLICATES ++;
+                    cout << "DUPLICATE parasite detection found at " << p2.centerX << "," << p2.centerY << "\n";
+                    totalError += 0.5 * realDist;
+                }
+                cout << "\n" << "OBSERVED PARASITE found at " << p2.centerX << "," << p2.centerY << "\n";
+                cout << realDist << " from expected parasite at " << p1.centerX << ", " << p1.centerY << "\n";
+
+                if (currDist < maxDist) {
+                    maxDist = currDist; 
+                }
+            }
+        }
+        if (maxDist == 901) {
+            cout << "Undetected Barber Worm Egg!!! at " << p1.centerX << "," <<  p1.centerY << "\n";
+            UNDETECTED ++;
+        }
+    }
+    for (int i=0; i<detectionPaired.size(); i++) {
+        int num = detectionPaired[i];
+        if (num ==1) { MissNums.push_back(i); }
+        MISSES += num;
+    }
+    cout << "\n-----------PERFORMANCE-----------\n" << "\nParasites Expected: " << expSize << "\n";
+    cout << "\nParasites Detected: " << obSize << "\n";
+    cout << "\nUndetected Parasite Eggs: " << UNDETECTED << "\n";
+    cout << "\nFalse Positive Eggs: " << MISSES << "\n\n";
+    cout << "\n---------ERROR ANALYSIS----------\n";
+    cout << "\nDistanceError: " << totalError << "\n";
+    totalError += 5*MISSES;
+    totalError += 20*UNDETECTED;
+    cout << "\nTotal Error Score: " << totalError;
+    cout << "\n\n";
+    
+    return MissNums;
+    /*
+    int vectorSize = max(expSize, obSize);
+    
+
+
+    vector<vector<int>> costMatrix(vectorSize, vector<int>(vectorSize));
+
+    //Can Populate the Table with Different Terms if Neccesary 
+
+
+    int maxVal = 0;
+    int currVal = 0;
+    for (int expIdx=0; expIdx<vectorSize; expIdx++) {
+        for (int obIdx=0; obIdx<vectorSize; obIdx++) {
+            if (expIdx >= expSize || obIdx >= obSize) {
+                costMatrix[expIdx][costIdx] = 
+            }
+            currVal = calculateSquaredDistance();
+        }
+    }*/
+
 
     
 
@@ -66,7 +159,7 @@ int main(int argc, const char* argv[]) {
     Mat gray;
     Mat image;
     Mat_<Vec3d> im;
-    int ht = 100; //higher threshold value for canny edge, lower is twice as small (ht/2)
+    int ht = 230; //higher threshold value
     int ct = 30; //center threshold, votes
     int minRad = 5; //minimum considered detection
     int maxRad = 20;
@@ -120,7 +213,7 @@ int main(int argc, const char* argv[]) {
     GaussianBlur(gray, gray, Size(3, 3), 0, 0, BORDER_DEFAULT);
 
     Mat thresh;
-    threshold(gray, thresh, 230, 255, THRESH_BINARY);
+    threshold(gray, thresh, ht, 255, THRESH_BINARY);
     imwrite("imaget.png", thresh);
 
     vector<vector<Point>> contours;
@@ -149,13 +242,14 @@ int main(int argc, const char* argv[]) {
                 // Further checks can be added here, e.g., comparing the area of the contour to the area of the fitted ellipse
 
                 // Draw the ellipse
+
                 cv::ellipse(image, fittedEllipse, cv::Scalar(255, 0, 0), 2);
                 
                 cv::Point2f centerPoint = fittedEllipse.center;
                 cv::Point point(static_cast<int>(centerPoint.x), static_cast<int>(centerPoint.y));
                 cv::circle(image, point, 2, cv::Scalar(0,0,255), -1);
 
-                Parasite p(centerPoint.x, centerPoint.y, fittedEllipse.width, fittedEllipse.height, fittedEllipse.width*fittedEllipse.height);
+                Parasite p(centerPoint.x, centerPoint.y, boundingBox.width, boundingBox.height, boundingBox.width*boundingBox.height);
                 detectedParasites.push_back(p);
 
                 std::string text = "(" + std::to_string(point.x) + ", " + std::to_string(point.y) + ")";
@@ -173,9 +267,24 @@ int main(int argc, const char* argv[]) {
         }
     }
 
-
     // CALCULATE ERROR //
-    calculateError(Annotations, detectedParasites);
+    vector<int> missed_guesses = calculateError(Annotations, detectedParasites);
+    for (int guess : missed_guesses) {
+        Point center(detectedParasites[guess].centerX,detectedParasites[guess].centerY);
+        int size = 50;
+
+        // Define the color of the "X" (red in BGR format)
+        cv::Scalar color(0, 0, 255);  // Red color
+
+        // Draw two lines to form the "X"
+        // Line from top-left to bottom-right
+        cv::line(image, cv::Point(center.x - size / 2, center.y - size / 2),
+                cv::Point(center.x + size / 2, center.y + size / 2), color, 2);
+
+        // Line from bottom-left to top-right
+        cv::line(image, cv::Point(center.x - size / 2, center.y + size / 2),
+                cv::Point(center.x + size / 2, center.y - size / 2), color, 2);
+    }
 
 
 
