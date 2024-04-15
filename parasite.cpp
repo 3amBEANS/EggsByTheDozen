@@ -159,6 +159,8 @@ int main(int argc, const char* argv[]) {
     Mat gray;
     Mat image;
     Mat_<Vec3d> im;
+    bool saveImages = true;
+    bool displayImage = true;
     int ht = 230; //higher threshold value
     int ct = 30; //center threshold, votes
     int minRad = 5; //minimum considered detection
@@ -190,6 +192,14 @@ int main(int argc, const char* argv[]) {
         if(strcmp(argv[i], "-mdd") == 0){
             mdd = stoi(argv[i+1]);
         }
+        if (strcmp(argv[i], "-save") == 0) {
+            int saveVal = stoi(argv[i+1]);
+            saveImages = (saveVal==1) ? true : false;
+        }
+        if (strcmp(argv[i], '-display') == 0) {
+            int dispVal = stoi(argv[i+1]);
+            displayImage = (dispVal==1) ? true : false;
+        }
     }
     try {
         Annotations = readAnnotations(fileName + ".txt");
@@ -206,7 +216,7 @@ int main(int argc, const char* argv[]) {
     cout << "Image Area: " << imgArea << "\n";
 
     cvtColor(image, gray, COLOR_BGR2GRAY, 0);
-    imwrite("imageg.png", gray);
+    if (saveImages) imwrite("imageg.png", gray);
 
     Mat edges; Mat cannyout;
     medianBlur(gray, gray, 5);
@@ -214,7 +224,7 @@ int main(int argc, const char* argv[]) {
 
     Mat thresh;
     threshold(gray, thresh, ht, 255, THRESH_BINARY);
-    imwrite("imaget.png", thresh);
+    if (saveImages) imwrite("imaget.png", thresh);
 
     vector<vector<Point>> contours;
     vector<Vec4i> hierarchy;
@@ -287,13 +297,15 @@ int main(int argc, const char* argv[]) {
     }
 
 
-
-    Mat image_copy = image.clone();
-    //drawContours(image_copy, contours, -1, Scalar(0, 255, 0), 2);
-    imshow("None approximation", image_copy);
-    waitKey(0);
-    imwrite("contours_none_image1.jpg", image_copy);
-    destroyAllWindows();
+    if (displayImage) {
+        Mat image_copy = image.clone();
+        //drawContours(image_copy, contours, -1, Scalar(0, 255, 0), 2);
+        imshow("None approximation", image_copy);
+        waitKey(0);
+        imwrite("contours_none_image1.jpg", image_copy);
+        destroyAllWindows();
+    }
+    
 
 
     //Canny(gray, cannyout, ht/1.4, ht, 3); //grayscale image, edges out, low thresh, high thresh, sobel kernel (3x3)
