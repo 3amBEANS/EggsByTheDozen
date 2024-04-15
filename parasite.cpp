@@ -196,7 +196,7 @@ int main(int argc, const char* argv[]) {
             int saveVal = stoi(argv[i+1]);
             saveImages = (saveVal==1) ? true : false;
         }
-        if (strcmp(argv[i], '-display') == 0) {
+        if (strcmp(argv[i], "-display") == 0) {
             int dispVal = stoi(argv[i+1]);
             displayImage = (dispVal==1) ? true : false;
         }
@@ -245,6 +245,7 @@ int main(int argc, const char* argv[]) {
             // Approximate contour to smooth shape
             std::vector<cv::Point> approx;  
             cv::approxPolyDP(contours[i], approx, 0.01 * cv::arcLength(contours[i], true), true);
+            
 
             if (approx.size() > 4) { // Need at least 5 points to fit ellipse
                 cv::RotatedRect fittedEllipse = cv::fitEllipse(approx);
