@@ -1,21 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eggs By The Dozen</title>
     <link rel="icon" type="image/x-icon" href="images/favicon.ico" />
     <link rel="stylesheet" type="text/css" href="css/style.css" />
-  </head>
-  <body>
+</head>
+
+<body>
     <div class="container">
-      <div class="box">
-        <h1>EGGS BY THE DOZEN</h1>
+        <h1>Eggs By The Dozen</h1>
         <form action="/action_page.php">
-          <input type="file" id="myFile" name="filename" />
-          <input type="submit" />
+            <!-- Custom styled file input -->
+            <div class="file-input-container">
+                <label for="myFile" class="file-upload-btn">Choose File</label>
+                <input type="file" id="myFile" name="filename" class="file-input" onchange="previewImage(event)" accept="image/*" />
+            </div>
+            <!-- Submit button -->
+            <input type="submit" class="submit-btn" value="Submit" />
         </form>
-      </div>
+        <!-- Image preview -->
+        <div class="image-preview">
+            <img id="preview" src="#" alt="Image Preview" />
+        </div>
     </div>
-  </body>
+
+    <script>
+        function previewImage(event) {
+            const fileInput = event.target;
+            const files = fileInput.files;
+
+            if (files.length > 0) {
+                const file = files[0];
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    const previewImage = document.getElementById('preview');
+                    previewImage.src = e.target.result;
+                }
+
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
+</body>
 </html>
