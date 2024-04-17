@@ -51,6 +51,7 @@ app.post('/', imgUpload.single("image"), (req,res) => {
 		}
 
 		// Render index.ejs with fecal egg count
+		// TODO: send image by sending string with modified image path
 		res.render("index.ejs", { show: true, count: stdout });
 
 		// Remove image from uploads/
