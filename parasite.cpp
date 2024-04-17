@@ -127,14 +127,16 @@ vector<int> calculateError(const vector<Parasite>& expected, const vector<Parasi
     return MissNums;
 }
 
-void test_contours(vector<vector<Point>> contours) {
+vector<vector<Point>> test_contours(vector<vector<Point>> contours) {
     vector<vector<Point>> newContours;
     for (size_t i = 0; i < contours.size(); i++) {
         // Calculate contour area and bounding rectangle
         double area = static_cast<int>(cv::contourArea(contours[i]));
-        if (area < x
+        if (area > 1000) {
+            newContours.push_back(contours[i]);
+        }
     }
-
+    return newContours;
 }
 
 int main(int argc, const char* argv[]) {
@@ -212,9 +214,12 @@ int main(int argc, const char* argv[]) {
     vector<Vec4i> hierarchy;
     findContours(thresh, contours, hierarchy, RETR_TREE, CHAIN_APPROX_NONE);
 
-    drawContours(gray, contours, -1, Scalar(0,255,0),2);
+    // ----- TEST CONTOURS ---- //
+    vector<vector<Point>> newContours = test_contours(contours);
+    drawContours(gray, newContours, -1, Scalar(0,255,0),2);
     if (saveImages) imwrite("imageC.jpg", gray);
 
+    // ----------------------- //
     vector<Parasite> detectedParasites;
 
 
@@ -231,6 +236,7 @@ int main(int argc, const char* argv[]) {
             // Approximate contour to smooth shape
             std::vector<cv::Point> approx;  
             cv::approxPolyDP(contours[i], approx, 0.01 * cv::arcLength(contours[i], true), true);
+            
             
 
             if (approx.size() > 4) { // Need at least 5 points to fit ellipse
@@ -289,7 +295,7 @@ int main(int argc, const char* argv[]) {
         //drawContours(image_copy, contours, -1, Scalar(0, 255, 0), 2);
         imshow("None approximation", image_copy);
         waitKey(0);
-        imwrite("contours_none_image1.jpg", image_copy);
+        imwrite("output.jpg", image_copy);
         destroyAllWindows();
     }
     
