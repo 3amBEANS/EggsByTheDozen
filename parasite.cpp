@@ -125,34 +125,16 @@ vector<int> calculateError(const vector<Parasite>& expected, const vector<Parasi
     cout << "\n\n";
     
     return MissNums;
-    /*
-    int vectorSize = max(expSize, obSize);
-    
+}
 
+void test_contours(vector<vector<Point>> contours) {
+    vector<vector<Point>> newContours;
+    for (size_t i = 0; i < contours.size(); i++) {
+        // Calculate contour area and bounding rectangle
+        double area = static_cast<int>(cv::contourArea(contours[i]));
+        if (area < x
+    }
 
-    vector<vector<int>> costMatrix(vectorSize, vector<int>(vectorSize));
-
-    //Can Populate the Table with Different Terms if Neccesary 
-
-
-    int maxVal = 0;
-    int currVal = 0;
-    for (int expIdx=0; expIdx<vectorSize; expIdx++) {
-        for (int obIdx=0; obIdx<vectorSize; obIdx++) {
-            if (expIdx >= expSize || obIdx >= obSize) {
-                costMatrix[expIdx][costIdx] = 
-            }
-            currVal = calculateSquaredDistance();
-        }
-    }*/
-
-
-    
-
-
-    //Apply the Hungarian Algorithm 
-    //To Tackle This Problem We First Apply a Threshold that Each Guessed Center must be within 30 
-    //pixels of an annotated center. We can do this in O(n^2) time. 
 }
 
 int main(int argc, const char* argv[]) {
@@ -230,7 +212,11 @@ int main(int argc, const char* argv[]) {
     vector<Vec4i> hierarchy;
     findContours(thresh, contours, hierarchy, RETR_TREE, CHAIN_APPROX_NONE);
 
+    drawContours(gray, contours, -1, Scalar(0,255,0),2);
+    if (saveImages) imwrite("imageC.jpg", gray);
+
     vector<Parasite> detectedParasites;
+
 
     for (size_t i = 0; i < contours.size(); i++) {
         // Calculate contour area and bounding rectangle
