@@ -1,3 +1,4 @@
+// Include Express
 const express = require('express');
 const app = express();
 
@@ -10,11 +11,11 @@ const imgUpload = multer({ dest: 'uploads/' });		// Instance of multer with dest
 const { exec } = require('child_process');
 const { unlink } = require('fs');
 
-//for static method
+// For Static Methods
 const static_files_router = express.static('static')
 app.use( static_files_router )
 
-// for post method
+// Body Parser Middleware for Post Methods
 const bodyParser = require('body-parser');
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -36,7 +37,6 @@ app.post('/', imgUpload.single("image"), (req,res) => {
 	exec('./build/MyProject ${filePath}', (error, stdout, stderr) => {
 		// Error with executing - terminate exec()
 		if (error) {
-			console.error("Internal Server Error: ", stderr);
 			res.status(500).send('Failed to process image sent by client');
 
 			// Remove image from uploads/
@@ -51,7 +51,6 @@ app.post('/', imgUpload.single("image"), (req,res) => {
 		}
 
 		// Render index.ejs with fecal egg count
-		// TODO: send image by sending string with modified image path
 		res.render("index.ejs", { show: true, count: stdout });
 
 		// Remove image from uploads/
