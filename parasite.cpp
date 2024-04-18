@@ -58,11 +58,11 @@ vector<int> calculateError(const vector<Parasite>& expected, const vector<Parasi
         vector<int> MissNums;
 
     if (obSize > expSize * 1.5) { 
-        cout << "Too many detected parasites, increase binary threshold.";
+        cout << "Too many detected parasites, increase binary threshold." << "\n";
         return MissNums;
     }
     else if (obSize < expSize * 0.4) { 
-        cout << "Not enough detected parasites, decrease binary threshold.";
+        cout << "Not enough detected parasites, decrease binary threshold." << "\n";
         return MissNums;
     }
 
@@ -82,7 +82,7 @@ vector<int> calculateError(const vector<Parasite>& expected, const vector<Parasi
         for (int a=0; a<obSize; a++) {
             p2 = observed[a];
             currDist = calculateSquaredDistance(p1.centerX, p1.centerY, p2.centerX, p2.centerY);
-            if (currDist < 900) {
+            if (currDist < 900) { 
                 detectionPaired[a] = 0;
                 float realDist = sqrt(currDist);
 
@@ -125,18 +125,6 @@ vector<int> calculateError(const vector<Parasite>& expected, const vector<Parasi
     cout << "\n\n";
     
     return MissNums;
-}
-
-vector<vector<Point>> test_contours(vector<vector<Point>> contours) {
-    vector<vector<Point>> newContours;
-    for (size_t i = 0; i < contours.size(); i++) {
-        // Calculate contour area and bounding rectangle
-        double area = static_cast<int>(cv::contourArea(contours[i]));
-        if (area > 1000) {
-            newContours.push_back(contours[i]);
-        }
-    }
-    return newContours;
 }
 
 int main(int argc, const char* argv[]) {
@@ -206,18 +194,28 @@ int main(int argc, const char* argv[]) {
     medianBlur(gray, gray, 5);
     GaussianBlur(gray, gray, Size(3, 3), 0, 0, BORDER_DEFAULT);
 
-    Mat thresh;
+    Mat thresh; 
     threshold(gray, thresh, ht, 255, THRESH_BINARY);
-    if (saveImages) imwrite("imaget.png", thresh);
+    if (saveImages) {
+        imwrite("imaget.png", thresh);
+    }
+
 
     vector<vector<Point>> contours;
     vector<Vec4i> hierarchy;
     findContours(thresh, contours, hierarchy, RETR_TREE, CHAIN_APPROX_NONE);
 
     // ----- TEST CONTOURS ---- //
-    vector<vector<Point>> newContours = test_contours(contours);
-    drawContours(gray, newContours, -1, Scalar(0,255,0),2);
-    if (saveImages) imwrite("imageC.jpg", gray);
+
+     Mat contourMap = image.clone();
+    
+    drawContours(contourMap, contours, -1, Scalar(0,0,100),2);
+
+    if (displayImage) {
+        imshow("Debri Contours", contourMap);
+        waitKey(0);
+    }
+
 
     // ----------------------- //
     vector<Parasite> detectedParasites;
