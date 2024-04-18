@@ -1,10 +1,9 @@
-// Include Express
 const express = require('express');
 const app = express();
 
 // Multer Middleware for File Uploads
 const multer = require('multer');
-const imgUpload = multer({ dest: 'uploads/' });		// Instance of multer with destination 'uploads/'
+const upload = multer({ dest: 'uploads/' });		// Instance of multer with destination 'uploads/'
 
 // exec() and unlink() in child-process and fs modules to handle 
 // C++ process and file removal, respectively
@@ -12,13 +11,17 @@ const { exec } = require('child_process');
 const { unlink } = require('fs');
 
 // For Static Methods
-const static_files_router = express.static('static')
-app.use( static_files_router )
+const static_files_router = express.static('static');
+app.use( static_files_router );
 
 // Body Parser Middleware for Post Methods
 const bodyParser = require('body-parser');
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// Path Module to create path to executable file
+const path = require('path');
+const myProjectPath = path.join('build', 'MyProject');
 
 // Set the view engine to EJS
 app.set('view engine', 'ejs');
@@ -30,18 +33,20 @@ app.get('/', (req,res) => {
 });
 
 // imgUpload.single() saves client's image in 'upload/' path
-app.post('/', imgUpload.single("image"), (req,res) => {
+app.post('/', upload.single("image"), (req,res) => {
 	const imagePath = req.file.path;		// Path to client's image input
 
 	// Execute C++ executable file
-	exec('./build/MyProject ${filePath}', (error, stdout, stderr) => {
+	exec(`${myProjectPath} ${imagePath}`, (error, stdout, stderr) => {
 		// Error with executing - terminate exec()
 		if (error) {
+			console.log("Error: " + error);
+			console.log("Stderr: " + stderr);
 			res.status(500).send('Failed to process image sent by client');
 
 			// Remove image from uploads/
-			unlink(imagePath, error => {
-				if (error) {
+			unlink(imagePath, err => {
+				if (err) {
 					console.log("Failed to remove image from 'uploads/' path");
 				} else {
 					console.log("Successfully removed image");

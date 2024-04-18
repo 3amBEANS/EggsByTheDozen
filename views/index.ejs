@@ -7,15 +7,58 @@
     <link rel="icon" type="image/x-icon" href="images/favicon.ico" />
     <link rel="stylesheet" type="text/css" href="css/style.css" />
   </head>
+
   <body>
     <div class="container">
-      <div class="box">
-        <h1>EGGS BY THE DOZEN</h1>
-        <form action="/action_page.php">
-          <input type="file" id="myFile" name="filename" />
-          <input type="submit" />
-        </form>
+      <h1>Eggs By The Dozen</h1>
+      <form action="/" method="POST" enctype="multipart/form-data">
+        <!-- Custom styled file input -->
+        <div class="file-input-container">
+          <label for="myFile" class="file-upload-btn">Choose File</label>
+          <input
+            type="file"
+            id="myFile"
+            name="image"
+            class="file-input"
+            onchange="previewImage(event)"
+            accept="image/*"
+          />
+        </div>
+        <!-- Submit button -->
+        <input type="submit" class="submit-btn" value="Submit" />
+      </form>
+      <!-- Image preview -->
+      <div class="image-preview">
+        <img id="preview" src="#" alt="Image Preview" />
       </div>
+      <% if (show) { %>
+      <div class="fec">
+        <p>Fecal egg count is <%= count %></p>
+        <img
+          src="build/output.jpeg"
+          alt="Fecal Sample with Fecal Eggs Highlighted"
+        />
+      </div>
+      <% } %>
     </div>
+
+    <script>
+      function previewImage(event) {
+        const fileInput = event.target;
+        const files = fileInput.files;
+
+        if (files.length > 0) {
+          const file = files[0];
+          const reader = new FileReader();
+
+          reader.onload = function (e) {
+            const previewImage = document.getElementById("preview");
+            previewImage.src = e.target.result;
+          };
+
+          reader.readAsDataURL(file);
+        }
+      }
+    </script>
   </body>
 </html>
