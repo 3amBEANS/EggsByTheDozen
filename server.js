@@ -5,43 +5,37 @@ const app = express();
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });		// Instance of multer with destination 'uploads/'
 
-// exec() and unlink() in child-process and fs modules to handle 
-// C++ process and file removal, respectively
+// Handle C++ process and file removal, respectively
 const { exec } = require('child_process');
 const { unlink } = require('fs');
 
-// For Static Methods
+// Middleware for Static Files
 const static_files_router = express.static('static');
 app.use( static_files_router );
 
-// Body Parser Middleware for Post Methods
-const bodyParser = require('body-parser');
-app.use(bodyParser.json()); // for parsing application/json
-app.use(bodyParser.urlencoded({ extended: true }));
-
-// Path Module to create path to executable file
+// Path to MyProject - dynamic based on OS
 const path = require('path');
 const myProjectPath = path.join('build', 'MyProject');
 
-// Set the view engine to EJS
+// View .ejs format
 app.set('view engine', 'ejs');
 
-// Get Request to Home Page
+
+// GET and POST requests to '/'
 app.get('/', (req,res) => {
 	// Render index.ejs without fecal egg count
 	res.render("index.ejs", { show: false, count: -1 });
 });
 
-// imgUpload.single() saves client's image in 'upload/' path
+// upload.single() saves image in 'upload/' path
 app.post('/', upload.single("image"), (req,res) => {
 	const imagePath = req.file.path;		// Path to client's image input
 
-	// Execute C++ executable file
+	// Execute OpenCV executable file
 	exec(`${myProjectPath} ${imagePath}`, (error, stdout, stderr) => {
 		// Error with executing - terminate exec()
 		if (error) {
-			console.log("Error: " + error);
-			console.log("Stderr: " + stderr);
+			console.log("Error: " + stderr);
 			res.status(500).send('Failed to process image sent by client');
 
 			// Remove image from uploads/
