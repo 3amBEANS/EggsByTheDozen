@@ -128,6 +128,8 @@ vector<int> calculateError(const vector<Parasite>& expected, const vector<Parasi
 }
 
 int main(int argc, const char* argv[]) {
+
+    
     Mat gray;
     Mat image;
     Mat_<Vec3d> im;
@@ -290,7 +292,6 @@ int main(int argc, const char* argv[]) {
 
     if (displayImage) {
         Mat image_copy = image.clone();
-        //drawContours(image_copy, contours, -1, Scalar(0, 255, 0), 2);
         imshow("None approximation", image_copy);
         waitKey(0);
         imwrite("output.jpg", image_copy);
