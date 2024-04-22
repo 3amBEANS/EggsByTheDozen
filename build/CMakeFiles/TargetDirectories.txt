@@ -1,3 +1,0 @@
-/Users/tommywilliams/Desktop/College_Documents/Classwork/ENGR/EggsByTheDozen/build/CMakeFiles/MyProject.dir
-/Users/tommywilliams/Desktop/College_Documents/Classwork/ENGR/EggsByTheDozen/build/CMakeFiles/edit_cache.dir
-/Users/tommywilliams/Desktop/College_Documents/Classwork/ENGR/EggsByTheDozen/build/CMakeFiles/rebuild_cache.dir
