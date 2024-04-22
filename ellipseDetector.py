@@ -76,3 +76,5 @@ class ellipseDetector:
                 # You can draw the ellipse on the image to visualize
                 return fitted_ellipse
         return None
+    
+    
