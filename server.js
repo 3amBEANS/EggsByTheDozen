@@ -1,27 +1,28 @@
 const express = require('express');
 const app = express();
 
-// Multer Middleware for File Uploads
+/* Multer Middleware for File Uploads */
 const multer = require('multer');
-const upload = multer({ dest: 'uploads/' });		// Instance of multer with destination 'uploads/'
+const upload = multer({ dest: 'uploads/' });		// Instance of multer
 
-// Handle C++ process and file removal, respectively
+/* Executes Child Process on Shell */
 const { exec } = require('child_process');
+
+/* Handles File Removal */
 const { unlink } = require('fs');
 
-// Middleware for Static Files
-const static_files_router = express.static('static');
-app.use( static_files_router );
+/* Middleware for Static Files */
+app.use(express.static('static'));
 
-// Path to MyProject - dynamic based on OS
+/* Path to MyProject - changes based on OS */
 const path = require('path');
-const myProjectPath = path.join('static', 'images', 'imParasites.png');
+const myProjectPath = path.join('static', 'images', 'imParasites.png');		// try join('images', 'imParasites.png') if this doesn't work
 
-// View .ejs format
+/* View .ejs format */
 app.set('view engine', 'ejs');
 
 
-// GET and POST requests to '/'
+/* GET and POST requests */
 app.get('/', (req,res) => {
 	// Render index.ejs without fecal egg count
 	res.render("index.ejs", { show: false, count: -1, image: '' });
