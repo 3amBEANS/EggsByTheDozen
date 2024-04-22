@@ -15,7 +15,7 @@ app.use( static_files_router );
 
 // Path to MyProject - dynamic based on OS
 const path = require('path');
-const myProjectPath = path.join('build', 'MyProject');
+const myProjectPath = path.join(__dirname, 'main.py');
 
 // View .ejs format
 app.set('view engine', 'ejs');
@@ -24,7 +24,7 @@ app.set('view engine', 'ejs');
 // GET and POST requests to '/'
 app.get('/', (req,res) => {
 	// Render index.ejs without fecal egg count
-	res.render("index.ejs", { show: false, count: -1 });
+	res.render("index.ejs", { show: false, count: -1, image: '' });
 });
 
 // upload.single() saves image in 'upload/' path
@@ -32,7 +32,7 @@ app.post('/', upload.single("image"), (req,res) => {
 	const imagePath = req.file.path;		// Path to client's image input
 
 	// Execute OpenCV executable file
-	exec(`${myProjectPath} ${imagePath}`, (error, stdout, stderr) => {
+	exec(`python main.py -f ${imagePath}`, (error, stdout, stderr) => {
 		// Error with executing - terminate exec()
 		if (error) {
 			console.log("Error: " + stderr);
@@ -42,22 +42,18 @@ app.post('/', upload.single("image"), (req,res) => {
 			unlink(imagePath, err => {
 				if (err) {
 					console.log("Failed to remove image from 'uploads/' path");
-				} else {
-					console.log("Successfully removed image");
 				}
 			});
 			return;
 		}
 
 		// Render index.ejs with fecal egg count
-		res.render("index.ejs", { show: true, count: stdout });
+		res.render("index.ejs", { show: true, count: stdout, image: 'imParasites.png' });
 
 		// Remove image from uploads/
 		unlink(imagePath, error => {
 			if (error) {
 				console.log("Failed to remove image from 'uploads/' path");
-			} else {
-				console.log("Successfully removed image");
 			}
 		});
 	});

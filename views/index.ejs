@@ -34,9 +34,9 @@
       <!-- Fecal Egg Count Display -->
       <% if (show) { %>
       <div class="fec">
-        <p>Fecal egg count is <%= count %></p>
+        <p>Fecal egg count is <b><%= count %></b></p>
         <img
-          src="build/output.jpeg"
+          src="<%= image %>"
           alt="Fecal Sample with Fecal Eggs Highlighted"
         />
       </div>
