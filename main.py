@@ -35,36 +35,37 @@ def main():
     contourImage = cv2.imread(fileName)
     ellipseImage = cv2.imread(fileName)
     
-    print(binary.shape)
-    print(contourImage.shape)
-    print(contourImage)
+    #print(binary.shape)
+    #print(contourImage.shape)
+    #print(contourImage)
     
     im_gray, binary, contourImage, ellipseImage = pad_all([im_gray, binary, contourImage, ellipseImage])
     
     if (saveImages): cv2.imwrite("imThresh.png", binary)
     
-    print(binary)
-    print(binary.shape, contourImage.shape)
-    #print(contourImage)
+    #print(binary)
+    #print(binary.shape, contourImage.shape)
     
     contours = cv2.findContours(binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[0]
     cv2.drawContours(contourImage, contours, -1, (0,0,0), 3)
     if (saveImages): cv2.imwrite("imContours.png", contourImage);
     
-    print("savedContours");
-    print(len(contours));
-
+    #print("savedContours");
+    #print(len(contours));
     
-    #RANSAC Approach O(n) Ellipse Fitting per Contour
+    num_eggs = 0
+    
     ellipseHelper = ellipseDetector()
     for contour in contours: 
         if len(contour)>=5:
             bestEllipse = getBestEllipse(ellipseHelper, contour)
             if not bestEllipse == None: 
-                cv2.ellipse(ellipseImage, bestEllipse, (255,0,255), 1)
+                cv2.ellipse(ellipseImage, bestEllipse, (0,0,255), 3)
+                num_eggs+=1
     
     cv2.imwrite("imParasites.png", ellipseImage);
-    
+    print("Seen: %d" % num_eggs)
+    print("Eggs Per Gram: %d" % (num_eggs * 50))
     
     
 if __name__=="__main__":
