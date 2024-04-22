@@ -15,7 +15,7 @@ app.use( static_files_router );
 
 // Path to MyProject - dynamic based on OS
 const path = require('path');
-const myProjectPath = path.join(__dirname, 'main.py');
+const myProjectPath = path.join('static', 'images', 'imParasites.png');
 
 // View .ejs format
 app.set('view engine', 'ejs');
