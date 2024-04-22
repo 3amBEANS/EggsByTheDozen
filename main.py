@@ -13,7 +13,7 @@ def main():
     
     
     
-    fileName = "unlabaled3.jpg"
+    fileName = "unlabeled3.jpg"
     thresh = 210
     
     for i in range(0, len(sys.argv)):

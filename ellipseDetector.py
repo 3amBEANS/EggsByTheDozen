@@ -66,7 +66,7 @@ class ellipseDetector:
         # Filter based on aspect ratio and minimum size
         elongation_factor = abs(1 - aspect_ratio)
         
-        if True: #0.1 < elongation_factor < 1 and 1000 < area < 4000:
+        if 0.1 < elongation_factor and elongation_factor < 1 and 1000 < area < 4000:
             # Approximate contour to smooth shape
             epsilon = 0.01 * cv2.arcLength(Contour, True)
             approx = cv2.approxPolyDP(Contour, epsilon, True)
