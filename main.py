@@ -7,6 +7,14 @@ from ellipseDetector import ellipseDetector
 def getBestEllipse(ellipseHelper, Contour):
     return ellipseHelper.fitEllipse_Polygon(Contour)
 
+def getBinaryThreshold(gray_image, threshold):
+    #OTSU METHOD
+    #return cv2.threshold(gray_image, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)[1]
+    
+    #TRADITIONAL METHOD
+    return cv2.threshold(gray_image, threshold, 255, cv2.THRESH_BINARY)[1] 
+
+
 def main():
     saveImages = True
     displayImages = True
@@ -24,11 +32,11 @@ def main():
     
     im_gray = cv2.imread(fileName, cv2.IMREAD_GRAYSCALE)
     
-    binary = cv2.threshold(im_gray, thresh, 255, cv2.THRESH_BINARY)[1] 
+    binary = getBinaryThreshold(im_gray, thresh)
     
     
     #Otsu Test Can Be Implemented to Guess Threshold Values#
-    #im_bw = cv2.threshold(im_gray, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)[1]
+    #
     
     
     
@@ -47,6 +55,8 @@ def main():
     #print(binary.shape, contourImage.shape)
     
     contours = cv2.findContours(binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[0]
+    #Filter Contour Areas
+    
     cv2.drawContours(contourImage, contours, -1, (0,0,0), 3)
     if (saveImages): cv2.imwrite("imContours.png", contourImage);
     
