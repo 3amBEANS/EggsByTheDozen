@@ -48,8 +48,15 @@ app.post('/', upload.single("image"), (req,res) => {
 			return;
 		}
 
+		let result = stdout;
+		result = result.replace('Seen: ', '');
+		result = result.replace('Eggs Per Gram: ', '');
+		let tokenIndex = result.indexOf('\n');
+		let fec = result.substring(0, tokenIndex);
+		let epg = result.substring(tokenIndex + 1);
+
 		// Render index.ejs with fecal egg count
-		res.render("index.ejs", { show: true, count: stdout, image: 'imParasites.png' });
+		res.render("index.ejs", { show: true, count: fec, gram: epg, image: 'imParasites.png' });
 
 		// Remove image from uploads/
 		unlink(imagePath, error => {
