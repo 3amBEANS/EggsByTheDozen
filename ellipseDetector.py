@@ -69,7 +69,7 @@ class ellipseDetector:
         areaMin = size[0]*1.5
         areaMax = size[0]*7
         
-        if 0.1 < elongation_factor and elongation_factor < 1 and areaMin < area < areaMax:
+        if 0.1 < elongation_factor and elongation_factor < 1 and areaMin < area and area < 8000:
             # Approximate contour to smooth shape
             epsilon = 0.01 * cv2.arcLength(Contour, True)
             approx = cv2.approxPolyDP(Contour, epsilon, True)

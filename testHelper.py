@@ -38,24 +38,40 @@ def getTestImagePacks():
     return Images
 
 
-def getTestImages(Images):
+def getTestImages(Images, thresh):
     print(len(Images))
     detected = []
+    errors = []
     for (img,file,Parasites) in Images:
-        im_t, observed = testProtocol(file, img, 210, Parasites)
-        error = calculate_error(Parasites,observed)
+        im_t, observed = testProtocol(file, img, thresh, Parasites)
+        errors.append(calculate_error(Parasites,observed))
         image_rgb = cv2.cvtColor(im_t, cv2.COLOR_BGR2RGB)
         pil_image = Image.fromarray(image_rgb)
         pil_image = pil_image.resize((533,400), Image.Resampling.LANCZOS)
         tk_image = ImageTk.PhotoImage(image=pil_image)
         detected.append(tk_image)
-    
-    return detected, error
+    return detected, errors
+
+def getTestErrors(Images, thresh): #ONLY USED FOR ONE IMAGE
+    totalErrors = []
+    miss_nums = []
+    for Image in Images:
+        m,e = getSingleTestError(Image, thresh)
+        miss_nums.append(m)
+        totalErrors.append(e)
+    return totalErrors,miss_nums
+
+def getSingleTestError(Image, Thresh):
+    img,file,Parasites = Image
+    im_t, observed = testProtocol(file, img, Thresh, Parasites)
+    return calculate_error(Parasites, observed, False)
+
+
 
 def calculate_squared_distance(x1, y1, x2, y2):
     return (x2 - x1) ** 2 + (y2 - y1) ** 2
 
-def calculate_error(expected, observed):
+def calculate_error(expected, observed, display=True):
     exp_size = len(expected)
     ob_size = len(observed)
     miss_nums = []
@@ -106,15 +122,17 @@ def calculate_error(expected, observed):
             miss_nums.append(i)
         misses += num
 
-    print("\n-----------PERFORMANCE-----------\n")
-    print(f"Parasites Expected: {exp_size}")
-    print(f"Parasites Detected: {ob_size}")
-    print(f"Undetected Parasite Eggs: {undetected}")
-    print(f"False Positive Eggs: {misses}\n")
-    print("\n---------ERROR ANALYSIS----------\n")
-    print(f"DistanceError: {total_error}")
+    if display:
+        print("\n-----------PERFORMANCE-----------\n")
+        print(f"Parasites Expected: {exp_size}")
+        print(f"Parasites Detected: {ob_size}")
+        print(f"Undetected Parasite Eggs: {undetected}")
+        print(f"False Positive Eggs: {misses}\n")
+        print("\n---------ERROR ANALYSIS----------\n")
+        print(f"DistanceError: {total_error}")
     total_error += 5 * misses
     total_error += 20 * undetected
-    print(f"Total Error Score: {total_error}\n")
+    if display:
+        print(f"Total Error Score: {total_error}\n")
 
-    return miss_nums, total_error
+    return undetected, total_error

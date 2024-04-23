@@ -15,13 +15,14 @@ from ellipseDetector import ellipseDetector
 from testHelper import getTestImages, calculate_error, getTestImagePacks
 
 
+thresh = 210
 ImageFiles = ["letter2.png", "unlabeled3.jpeg", "arrows1.jpeg"]
 Images = getTestImagePacks()
 
 
 
 root = tk.Tk()
-testImgs = getTestImages(Images)[0]
+testImgs = getTestImages(Images, thresh)[0]
 root.title("Image Grid")
 
 
