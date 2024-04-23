@@ -78,7 +78,7 @@ def detectParasites(fileName, thresh, outFile = "", saveImages = True):
     
     if (saveImages):
         if outFile == "":
-            cv2.imwrite("imParasites.png", ellipseImage);
+            cv2.imwrite("static/Images/imParasites.png", ellipseImage);
         else: 
             cv2.imwrite(outFile, ellipseImage);
         
