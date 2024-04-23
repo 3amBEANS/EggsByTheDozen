@@ -12,15 +12,28 @@ class Parasite:
         self.height = height
         self.estArea = estArea
 
-def getBestEllipse(ellipseHelper, Contour):
-    return ellipseHelper.fitEllipse_Polygon(Contour)
+def getBestEllipse(ellipseHelper, Contour, size):
+    return ellipseHelper.fitEllipse_Polygon(Contour,size)
 
 def getBinaryThreshold(gray_image, threshold):
+    blur = cv2.GaussianBlur(gray_image, (3,3), 0)
+    otsu_threshold, image_result = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    return(image_result)
+    
     #OTSU METHOD
-    return cv2.threshold(gray_image, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)[1]
+    #return cv2.threshold(gray_image, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)[1]
+
+    #OTSU with Blur
+    #
+    #return cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)[1]
+
+    #Adaptive Thresholding with Blur 
+    #return cv2.adaptiveThreshold(blur, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 9, 3)
+
+    #return cv2.adaptiveThreshold(blur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 9, 3)
     
     #TRADITIONAL METHOD
-    #return cv2.threshold(gray_image, threshold, 255, cv2.THRESH_BINARY)[1] 
+    #return cv2.threshold(gray_image, 220, 255, cv2.THRESH_BINARY)[1] 
 
 def detectParasites(fileName, thresh, outFile = "", saveImages = True):
     
@@ -34,6 +47,7 @@ def detectParasites(fileName, thresh, outFile = "", saveImages = True):
     #print(binary.shape)
     #print(contourImage.shape)
     #print(contourImage)
+    size = im_gray.shape
     
     im_gray, binary, contourImage, ellipseImage = pad_all([im_gray, binary, contourImage, ellipseImage])
     
@@ -53,10 +67,11 @@ def detectParasites(fileName, thresh, outFile = "", saveImages = True):
     
     num_eggs = 0
     
+    
     ellipseHelper = ellipseDetector()
     for contour in contours: 
         if len(contour)>=5:
-            bestEllipse = getBestEllipse(ellipseHelper, contour)
+            bestEllipse = getBestEllipse(ellipseHelper, contour, size)
             if not bestEllipse == None: 
                 cv2.ellipse(ellipseImage, bestEllipse, (0,0,255), 3)
                 num_eggs+=1
@@ -80,6 +95,8 @@ def testProtocol(fileName, img, thresh, Parasites):
     
     binary = getBinaryThreshold(im_gray, thresh)
     
+    size = im_gray.shape
+    
     im_gray, binary, greenMat = pad_all([im_gray, binary, greenMat])
     
     contours = cv2.findContours(binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[0]
@@ -90,7 +107,7 @@ def testProtocol(fileName, img, thresh, Parasites):
     observedParasites = []
     for contour in contours: 
         if len(contour)>=5:
-            bestEllipse = getBestEllipse(ellipseHelper, contour)
+            bestEllipse = getBestEllipse(ellipseHelper, contour, size)
             if not bestEllipse == None: 
                 cv2.ellipse(greenMat, bestEllipse, (0,0,255), 3)
                 (cx,cy),(ma,ml),a = bestEllipse
