@@ -52,6 +52,17 @@ def getTestImages(Images, thresh):
         detected.append(tk_image)
     return detected, errors
 
+def getSingleTestImage(ImagePack, thresh):
+    img,file,Parasites = ImagePack
+    im_t, observed = testProtocol(file, img, thresh, Parasites)
+    errors = calculate_error(Parasites,observed)
+    image_rgb = cv2.cvtColor(im_t, cv2.COLOR_BGR2RGB)
+    pil_image = Image.fromarray(image_rgb)
+    pil_image = pil_image.resize((533,400), Image.Resampling.LANCZOS)
+    tk_image = ImageTk.PhotoImage(image=pil_image)
+    detected = tk_image
+    return detected, errors
+
 def getTestErrors(Images, thresh): #ONLY USED FOR ONE IMAGE
     totalErrors = []
     miss_nums = []
