@@ -13,7 +13,7 @@ import math
 from ellipseDetector import ellipseDetector
 
 def getTestImagePacks():
-    ImageFiles = ["letter2.png", "unlabeled3.jpeg", "arrows1.jpeg"]
+    ImageFiles = ["easy_test.png", "medium_test.jpeg", "hard_test.jpeg"]
     Images = []
 
     for fileName in ImageFiles:

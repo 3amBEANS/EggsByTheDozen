@@ -16,7 +16,7 @@ from testHelper import getTestImages, calculate_error, getTestImagePacks
 
 
 thresh = 210
-ImageFiles = ["letter2.png", "unlabeled3.jpeg", "arrows1.jpeg"]
+ImageFiles = ["easy_test.png", "medium_test.jpeg", "hard_test.jpeg"]
 Images = getTestImagePacks()
 
 
