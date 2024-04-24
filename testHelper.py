@@ -39,7 +39,7 @@ def getTestImagePacks():
 
 
 def getTestImages(Images, thresh):
-    print(len(Images))
+    #print(len(Images))
     detected = []
     errors = []
     for (img,file,Parasites) in Images:
@@ -88,10 +88,12 @@ def calculate_error(expected, observed, display=True):
     miss_nums = []
 
     if ob_size > exp_size * 1.5:
-        print("Too many detected parasites, increase binary threshold.")
+        pass
+        #print("Too many detected parasites, increase binary threshold.")
         #return miss_nums
     elif ob_size < exp_size * 0.4:
-        print("Not enough detected parasites, decrease binary threshold.")
+        pass
+        #print("Not enough detected parasites, decrease binary threshold.")
         #return miss_nums
 
     duplicates = 0

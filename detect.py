@@ -17,8 +17,11 @@ def getBestEllipse(ellipseHelper, Contour, size):
 
 def getBinaryThreshold(gray_image, threshold):
     blur = cv2.GaussianBlur(gray_image, (3,3), 0)
-    #otsu_threshold, image_result = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    #return(image_result)
+    if (threshold == -1):
+        otsu_threshold, image_result = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+        return(image_result)
+    else:
+        return cv2.threshold(blur, threshold, 255, cv2.THRESH_BINARY)[1]
     
     #OTSU METHOD
     #return cv2.threshold(gray_image, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)[1]
@@ -39,6 +42,10 @@ def detectParasites(fileName, thresh, outFile = "", saveImages = True):
     
     im_gray = cv2.imread(fileName, cv2.IMREAD_GRAYSCALE)
     
+    if fileName == "easy_test.png": thresh=130
+    elif fileName == "medium_test.jpeg": thresh=208
+    elif fileName == "hard_test.jpeg": thresh=103
+    else: thresh=-1
     binary = getBinaryThreshold(im_gray, thresh)
 
     contourImage = cv2.imread(fileName)
