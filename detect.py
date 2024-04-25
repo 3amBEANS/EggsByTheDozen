@@ -21,12 +21,16 @@ class INFESTATION(Enum):
         
 def successCriteria(eggsPerGram):
     if eggsPerGram > 650: 
+        print("Heavy Infestation: Anthelmintic Treatment Necesary")
         return INFESTATION.HEAVY
     elif eggsPerGram > 350: 
+        print("Moderate Infestation: Anthelmintic Treament Recommended")
         return INFESTATION.MODERATE
     elif eggsPerGram > 50:
+        print("Light Infestation: Treatment Not Necessary")
         return INFESTATION.LIGHT
     else:
+        print("No Infestation: Sample is Healthy")
         return INFESTATION.NONE
 
 def getBestEllipse(ellipseHelper, Contour, size):
@@ -110,6 +114,7 @@ def detectParasites(fileName, thresh, outFile = "", saveImages = True):
         
     print("Seen: %d" % num_eggs)
     print("Eggs Per Gram: %d" % (num_eggs * 50))
+    successCriteria(num_eggs*50)
     
     
 def testProtocol(fileName, img, thresh, Parasites):
