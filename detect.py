@@ -117,10 +117,10 @@ def testProtocol(fileName, img, thresh, Parasites):
     
     greenMat = img.copy()
     
-    if fileName == "easy_test.png": thresh=130
-    elif fileName == "medium_test.jpeg": thresh=208
-    elif fileName == "hard_test.jpeg": thresh=103
-    else: thresh=-1
+    #if fileName == "easy_test.png": thresh=130
+    #elif fileName == "medium_test.jpeg": thresh=208
+    #elif fileName == "hard_test.jpeg": thresh=103
+    #else: thresh=-1
     binary = getBinaryThreshold(im_gray, thresh)
     
     size = im_gray.shape
