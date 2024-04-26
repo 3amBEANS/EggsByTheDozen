@@ -21,10 +21,10 @@ class INFESTATION(Enum):
         
 def successCriteria(eggsPerGram):
     if eggsPerGram > 650: 
-        print("Heavy Infestation: Anthelmintic Treatment Necesary")
+        print("Heavy Infestation: Anthelmintic Treatment Necessary")
         return INFESTATION.HEAVY
     elif eggsPerGram > 350: 
-        print("Moderate Infestation: Anthelmintic Treament Recommended")
+        print("Moderate Infestation: Anthelmintic Treatment Recommended")
         return INFESTATION.MODERATE
     elif eggsPerGram > 50:
         print("Light Infestation: Treatment Not Necessary")
