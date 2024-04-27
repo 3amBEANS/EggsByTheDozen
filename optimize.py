@@ -28,17 +28,17 @@ def optimize(ImagePack):
         ThresVals.append(i)
         TotalError.append(errorVal[1])
         UndetectedParasites.append(errorVal[0])
-        print(errorVal, undetected)
+        #print(errorVal, undetected)
         
         if errorVal[0] < Least_Undetected[0]: Least_Undetected = (errorVal[0], i)
         if errorVal[1] < Lowest_Error[0]: Lowest_Error = (errorVal[1], i)
         
 
-    print(Lowest_Error)
-    print(Least_Undetected)
+    #print(Lowest_Error)
+    #print(Least_Undetected)
     
     
-    #return TotalError, UndetectedParasites, Lowest_Error, Least_Undetected
+    return TotalError, UndetectedParasites, Lowest_Error, Least_Undetected
     
     plt.figure(figsize=(10, 6))
     plt.plot(ThresVals, TotalError, label='Error Value for Hard Test Sample', marker='o')
@@ -143,6 +143,6 @@ def optimalDisplay():
     
 imagePacks = getTestImagePacks()
 #print(type(imagePacks))
-optimize(imagePacks[2])
+#optimize(imagePacks[3])
 #getDataForOptimizeAll(imagePacks)
-#optimalDisplay()
+optimalDisplay()
