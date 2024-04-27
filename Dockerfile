@@ -1,5 +1,5 @@
 # Run "docker build -t myapp:latest ." to build docker
-# Run "docker run -p 3000:3000 myapp:latest" to launch docker
+# Run "docker run -p 3000:3000 myapp:latest" to launch docker on port 3000
 
 # Base image that supports Node/Express and Python
 FROM nikolaik/python-nodejs:latest
