@@ -4,7 +4,7 @@
 
 ## Check out the project in action
 
-[Watch the project video here]([https://link-to-your-video](https://youtu.be/VgkAQhBrsf8?si=Mh97xBtGu77kGTCk))
+[Watch the project video here](https://youtu.be/VgkAQhBrsf8?si=Mh97xBtGu77kGTCk)
 
 ## Authors
 
